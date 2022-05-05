@@ -17,7 +17,7 @@ import games.rednblack.gdxar.android.util.AcceptableFuture;
 /**
  * A no-UI fragment that handles ARCore initialization.  This fragment handles
  * the camera permission, ARCore compatibility and version checks.
- * <p/>
+ *
  * To use this fragment, add it to the activity and call {@link ARSupportFragment#getArSupported}
  * to get the result determining if ARCore is supported or not.
  *
