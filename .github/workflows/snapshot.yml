@@ -1,0 +1,33 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: SNAPSHOT Build
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  snapshot:
+    if: "!contains(github.event.head_commit.message, 'cd skip')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup Eclipse Temurin OpenJDK 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: 11
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Run jUnit Test
+        run: ./gradlew test --tests "*"
+      - name: Publish SNAPSHOT artifacts
+        if: success()
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: ./gradlew build publish -PSNAPSHOT=true

@@ -2,8 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'games.rednblack'
-version '0.1'
+apply from : 'publish.gradle'
 
 repositories {
     mavenCentral()
@@ -11,11 +10,21 @@ repositories {
 
 dependencies {
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
-test {
-    useJUnitPlatform()
+java {
+    withJavadocJar()
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+task dist(type: Jar) {
+    from files(sourceSets.main.output.classesDirs)
+    from files(sourceSets.main.output.resourcesDir)
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["--release", "7"]
 }
