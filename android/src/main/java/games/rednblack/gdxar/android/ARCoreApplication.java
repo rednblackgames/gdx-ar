@@ -138,7 +138,9 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     }
 
     /**
-     * ARCore session object.
+     * Get current ARCore session from framework.
+     *
+     * @return ARCore session object
      */
     protected Session getSession() {
         return ((ARFragmentApplication) Gdx.app).getSessionSupport().getSession();
