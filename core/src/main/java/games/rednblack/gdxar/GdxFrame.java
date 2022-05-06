@@ -13,11 +13,14 @@ import com.badlogic.gdx.utils.Pools;
  * @author fgnm
  */
 public class GdxFrame implements Pool.Poolable {
-    /** Current anchors tracked by the framework */
+    /** Current anchors list tracked by the framework */
     private final Array<GdxAnchor> anchors = new Array<>(GdxAnchor.class);
 
-    /** Current augmented images tracked by the framework */
+    /** Current augmented images list tracked by the framework */
     private final GdxAugmentedImages augmentedImages = new GdxAugmentedImages();
+
+    /** Current planes list tracked by the framework */
+    private final Array<GdxPlane> planes = new Array<>(GdxPlane.class);
 
     /** Current status of the light estimation calculated by the framework */
     public GdxLightEstimationMode lightEstimationMode = GdxLightEstimationMode.DISABLED;
@@ -41,16 +44,28 @@ public class GdxFrame implements Pool.Poolable {
         anchors.add(anchor);
     }
 
+    public void addPlane(GdxPlane plane) {
+        planes.add(plane);
+    }
+
     public void addAugmentedImage(GdxAugmentedImage augmentedImage) {
         augmentedImages.add(augmentedImage);
     }
 
     /**
-     * Get current anchors tracked by the framework.
+     * Get current anchors list tracked by the framework.
      * @return Array with anchors in updated state
      */
     public Array<GdxAnchor> getAnchors() {
         return anchors;
+    }
+
+    /**
+     * Get current planes list tracked by the framework.
+     * @return Array with planes in updated state
+     */
+    public Array<GdxPlane> getPlanes() {
+        return planes;
     }
 
     /**
@@ -65,6 +80,9 @@ public class GdxFrame implements Pool.Poolable {
     public void reset() {
         Pools.freeAll(anchors);
         anchors.clear();
+
+        Pools.freeAll(planes);
+        planes.clear();
 
         Pools.freeAll(augmentedImages);
         augmentedImages.clear();

@@ -19,6 +19,7 @@ import com.badlogic.gdx.backends.android.surfaceview.FillResolutionStrategy;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
+import games.rednblack.gdxar.GdxARConfiguration;
 import games.rednblack.gdxar.GdxArApplicationListener;
 import games.rednblack.gdxar.android.util.ARSessionSupport;
 
@@ -46,8 +47,8 @@ public class ARFragmentApplication extends AndroidFragmentApplication implements
         lifecycleRegistry = new LifecycleRegistry(this);
     }
 
-    public void setArApplication(GdxArApplicationListener arApplication) {
-        this.arApplication = new ARCoreApplication(arApplication);
+    public void setArApplication(GdxArApplicationListener arApplication, GdxARConfiguration gdxARConfiguration) {
+        this.arApplication = new ARCoreApplication(arApplication, gdxARConfiguration);
     }
 
     public ARCoreApplication getArApplication() {

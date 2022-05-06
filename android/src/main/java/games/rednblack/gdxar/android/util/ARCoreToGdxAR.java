@@ -4,18 +4,9 @@ import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
-import com.google.ar.core.Anchor;
-import com.google.ar.core.AugmentedImage;
-import com.google.ar.core.Config;
-import com.google.ar.core.Pose;
-import com.google.ar.core.TrackingState;
+import com.google.ar.core.*;
 
-import games.rednblack.gdxar.GdxAnchor;
-import games.rednblack.gdxar.GdxAugmentedImage;
-import games.rednblack.gdxar.GdxLightEstimationMode;
-import games.rednblack.gdxar.GdxPose;
-import games.rednblack.gdxar.GdxTrackingMethod;
-import games.rednblack.gdxar.GdxTrackingState;
+import games.rednblack.gdxar.*;
 
 /**
  * Utility class that convert ARCore classes into GdxAR
@@ -57,6 +48,18 @@ public class ARCoreToGdxAR {
         return augmentedImage;
     }
 
+    public static GdxPlane createGdxPlane(Plane plane) {
+        GdxPlane gdxPlane = Pools.obtain(GdxPlane.class);
+        Pose pose = plane.getCenterPose();
+        ARCoreToGdxAR.map(pose, gdxPlane.gdxPose);
+        gdxPlane.trackingState = ARCoreToGdxAR.map(plane.getTrackingState());
+        gdxPlane.extentX = plane.getExtentX();
+        gdxPlane.extentZ = plane.getExtentZ();
+        gdxPlane.type = ARCoreToGdxAR.map(plane.getType());
+
+        return gdxPlane;
+    }
+
     public static void map(Pose pose, GdxPose gdxPose) {
         pose.getTranslation(tmpPoseTranslation, 0);
         pose.getRotationQuaternion(tmpPoseRotation, 0);
@@ -83,6 +86,19 @@ public class ARCoreToGdxAR {
                 return GdxTrackingMethod.LAST_KNOWN_POSE;
             default:
                 return GdxTrackingMethod.NOT_TRACKING;
+        }
+    }
+
+    public static GdxPlaneType map(Plane.Type type) {
+        switch (type) {
+            case VERTICAL:
+                return GdxPlaneType.VERTICAL;
+            case HORIZONTAL_DOWNWARD_FACING:
+                return GdxPlaneType.HORIZONTAL_DOWNWARD_FACING;
+            case HORIZONTAL_UPWARD_FACING:
+                return GdxPlaneType.HORIZONTAL_UPWARD_FACING;
+            default:
+                return null;
         }
     }
 

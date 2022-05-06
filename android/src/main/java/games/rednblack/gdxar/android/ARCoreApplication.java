@@ -31,13 +31,7 @@ import com.google.ar.core.TrackingState;
 import java.io.InputStream;
 import java.util.Collection;
 
-import games.rednblack.gdxar.GdxArApplicationListener;
-import games.rednblack.gdxar.GdxAnchor;
-import games.rednblack.gdxar.GdxAugmentedImage;
-import games.rednblack.gdxar.GdxFrame;
-import games.rednblack.gdxar.GdxAR;
-import games.rednblack.gdxar.GdxLightEstimationMode;
-import games.rednblack.gdxar.GdxPose;
+import games.rednblack.gdxar.*;
 import games.rednblack.gdxar.util.PlaneModel;
 import games.rednblack.gdxar.android.util.ARCoreToGdxAR;
 import games.rednblack.gdxar.util.DebugShaderProvider;
@@ -53,7 +47,6 @@ import games.rednblack.gdxar.util.RawAugmentedImageAsset;
  * @author fgnm
  */
 public class ARCoreApplication implements ApplicationListener, GdxAR {
-    private static final boolean DEBUG = false;
     // The camera which is controlled by the ARCore pose.
     private PerspectiveCamera arCamera;
     // Renderer for the camera image which is the background for the ARCore app.
@@ -62,6 +55,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     private ModelBatch debugModelBatch;
 
     protected GdxArApplicationListener gdxArApplicationListener;
+    protected GdxARConfiguration gdxARConfiguration;
     protected Config sessionConfig;
 
     private final float[] cameraProjectionMatrix = new float[16];
@@ -71,9 +65,10 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     protected boolean renderAR = false;
     protected final GdxFrame frameInstance;
 
-    public ARCoreApplication(GdxArApplicationListener gdxArApplicationListener) {
+    public ARCoreApplication(GdxArApplicationListener gdxArApplicationListener, GdxARConfiguration gdxARConfiguration) {
         this.gdxArApplicationListener = gdxArApplicationListener;
         this.gdxArApplicationListener.setArAPI(this);
+        this.gdxARConfiguration = gdxARConfiguration;
 
         frameInstance = new GdxFrame();
     }
@@ -154,7 +149,14 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         }
         sessionConfig.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
         sessionConfig.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
-        sessionConfig.setLightEstimationMode(Config.LightEstimationMode.ENVIRONMENTAL_HDR);
+        switch (gdxARConfiguration.lightEstimationMode) {
+            case DISABLED:
+                sessionConfig.setLightEstimationMode(Config.LightEstimationMode.DISABLED);
+            case AMBIENT_INTENSITY:
+                sessionConfig.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
+            case ENVIRONMENTAL_HDR:
+                sessionConfig.setLightEstimationMode(Config.LightEstimationMode.ENVIRONMENTAL_HDR);
+        }
 
         getSession().configure(sessionConfig);
 
@@ -202,6 +204,11 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 Matrix4.mul(arCamera.combined.val, arCamera.view.val);
 
                 frameInstance.reset();
+
+                for (Plane plane : surfaces) {
+                    GdxPlane gdxPlane = ARCoreToGdxAR.createGdxPlane(plane);
+                    frameInstance.addPlane(gdxPlane);
+                }
 
                 for (Anchor anchor : frame.getUpdatedAnchors()) {
                     GdxAnchor gdxAnchor = ARCoreToGdxAR.createGdxAnchor(anchor);
@@ -255,14 +262,14 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
                 Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 
-                if (DEBUG) {
+                if (gdxARConfiguration.debugMode) {
                     debugModelBatch.begin(arCamera);
-                    drawPlanes(debugModelBatch);
+                    drawPlanes(debugModelBatch, surfaces);
                 }
 
                 gdxArApplicationListener.renderARModels(frameInstance);
 
-                if (DEBUG) debugModelBatch.end();
+                if (gdxARConfiguration.debugMode) debugModelBatch.end();
             }
         }
 
@@ -358,10 +365,10 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
     Array<ModelInstance> planeInstances = new Array<>();
     /** Draws the planes detected. */
-    private void drawPlanes(ModelBatch modelBatch) {
+    private void drawPlanes(ModelBatch modelBatch,  Collection<Plane> surfaces) {
         planeInstances.clear();
         int index = 0;
-        for (Plane plane : getSession().getAllTrackables(Plane.class)) {
+        for (Plane plane : surfaces) {
 
             // check for planes that are no longer valid
             if (plane.getSubsumedBy() != null

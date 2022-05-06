@@ -85,7 +85,7 @@ public class PlaneMaterial extends Material {
 
     public PlaneMaterial(int index) {
         if (gridTexture == null) {
-            gridTexture = new Texture("textures/trigrid.png");
+            gridTexture = new Texture("trigrid.png");
             gridTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         }
         set(TextureAttribute.createDiffuse(gridTexture));
