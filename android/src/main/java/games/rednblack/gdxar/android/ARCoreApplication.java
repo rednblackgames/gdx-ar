@@ -31,6 +31,7 @@ import com.google.ar.core.TrackingState;
 import java.io.InputStream;
 import java.util.Collection;
 
+import com.google.ar.core.exceptions.CameraNotAvailableException;
 import games.rednblack.gdxar.*;
 import games.rednblack.gdxar.util.PlaneModel;
 import games.rednblack.gdxar.android.util.ARCoreToGdxAR;
@@ -75,7 +76,20 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
     @Override
     public void setRenderAR(boolean renderAR) {
-        this.renderAR = renderAR;
+        if (this.renderAR == renderAR) return;
+
+        if (renderAR) {
+            try {
+                getSession().resume();
+                this.renderAR = true;
+            } catch (CameraNotAvailableException e) {
+                this.renderAR = false;
+                e.printStackTrace();
+            }
+        } else {
+            getSession().pause();
+            this.renderAR = false;
+        }
     }
 
     @Override
@@ -299,6 +313,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     @Override
     @Null
     public GdxAnchor requestHitPlaneAnchor(float x, float y) {
+        if (!renderAR) return null;
+
         ARCoreGraphics arCoreGraphics = (ARCoreGraphics) Gdx.graphics;
         Frame frame = arCoreGraphics.getCurrentFrame();
 
@@ -318,6 +334,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     @Override
     @Null
     public GdxPose requestHitPlanePose(float x, float y) {
+        if (!renderAR) return null;
+
         ARCoreGraphics arCoreGraphics = (ARCoreGraphics) Gdx.graphics;
         Frame frame = arCoreGraphics.getCurrentFrame();
 
