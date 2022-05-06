@@ -60,6 +60,13 @@ public interface GdxAR {
     void setRenderAR(boolean renderAR);
 
     /**
+     * Check if the library is rendering AR scenes or not.
+     *
+     * @return true if AR rendering is enabled with {@link #setRenderAR(boolean)}
+     */
+    boolean isRenderingAR();
+
+    /**
      * Load an Augmented Images Database from a binary file.
      *
      * @param databaseStream InputStream of the database asset file.

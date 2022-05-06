@@ -79,6 +79,11 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     }
 
     @Override
+    public boolean isRenderingAR() {
+        return renderAR;
+    }
+
+    @Override
     public boolean loadAugmentedImageDatabase(InputStream databaseStream) {
         try {
             AugmentedImageDatabase augmentedImageDatabase = AugmentedImageDatabase.deserialize(getSession(), databaseStream);
