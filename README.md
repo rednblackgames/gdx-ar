@@ -47,10 +47,127 @@ List of implemented ARCore features:
 - Full Tracking state
 - Augmented Images (and Augmented Images Database)
 - Light Estimation (AMBIENT_INTENSITY, ENVIRONMENTAL_HDR)
+- Camera autofocus
 
-#### Basic Implementation
+## Basic Implementation
 
-Soon :)
+Library implementation in a standard libGDX project is easy. 
+
+### Android
+
+Basic `AndroidLauncher` to enable ARCore capabilities, it's based on `FragmentActivity`:
+
+```Java
+/** Launches the Android application. */
+public class AndroidLauncher extends FragmentActivity implements AndroidFragmentApplication.Callbacks {
+	private static final String TAG = "GDX AR Application";
+
+	private GdxArApplicationListener applicationListener;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// Loads the fragment.  There is no layout for this fragment, so it is simply added.
+		ARSupportFragment supportFragment = new ARSupportFragment();
+
+		getSupportFragmentManager().beginTransaction().add(
+				supportFragment, ARSupportFragment.TAG).commitAllowingStateLoss();
+
+		applicationListener = new MainApplicationListener(this);
+
+		// Add the listener to check for ARCore being supported and camera permissions are granted.
+		supportFragment.getArSupported().thenAccept(useAR -> {
+			if (useAR) {
+				// Done with the AR support fragment, so remove it.
+				removeSupportFragment();
+
+				ARFragmentApplication fragment = new ARFragmentApplication();
+				AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
+				fragment.setConfiguration(configuration);
+				GdxARConfiguration gdxARConfiguration = new GdxARConfiguration();
+				fragment.setArApplication(applicationListener, gdxARConfiguration);
+
+				// Finally place it in the layout.
+				getSupportFragmentManager().beginTransaction()
+						.add(android.R.id.content, fragment)
+						.commitAllowingStateLoss();
+			}
+		}).exceptionally(ex -> {
+			Log.e(TAG, "Exception checking for ARSupport", ex);
+			return null;
+		});
+	}
+
+	private void removeSupportFragment() {
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(ARSupportFragment.TAG);
+		if (fragment != null) {
+			getSupportFragmentManager().beginTransaction().remove(fragment).commitAllowingStateLoss();
+		}
+	}
+}
+```
+
+### Core
+
+Basic implementation of the libGDX `ApplicationListener` with AR capabilities:
+
+```Java
+public class MainApplicationListener extends GdxArApplicationListener {
+    //Augmented Images are really heavy objects to load, async loading is preferred
+    private final AsyncExecutor augmentedImagesAsyncExecutor = new AsyncExecutor(2);
+
+    @Override
+    public void create(Camera arCamera) {
+        //Load everything like AssetManager, init code, etc
+
+        //Example how to load Augmented Images using async thread
+        augmentedImagesAsyncExecutor.submit(new AsyncTask<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Array<RawAugmentedImageAsset> images = new Array<>();
+
+                RawAugmentedImageAsset marker = Pools.obtain(RawAugmentedImageAsset.class);
+                marker.name = "marker";
+                marker.widthInMeter = 1f;
+                marker.inputStream = Gdx.files.internal("marker.jpg").read();
+                images.add(marker);
+
+                RawAugmentedImageAsset cross = Pools.obtain(RawAugmentedImageAsset.class);
+                cross.name = "cross";
+                cross.widthInMeter = 0.4f;
+                cross.inputStream = Gdx.files.internal("cross.jpg").read();
+                images.add(cross);
+
+                getArAPI().buildAugmentedImageDatabase(images);
+
+                Pools.freeAll(images);
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public void renderARModels(GdxFrame frame) {
+        //If AR rendering is enabled this function will be called.
+        //Here should be rendered only the 3D AR scene based on GdxFrame information
+        //Camera preview rendering is already done by the gdx-ar library
+    }
+
+    @Override
+    public void render() {
+        //Standard libGDX render method that is called after renderARModels
+        //Load AssetManager, Draw GUI, Stages or any other things
+    }
+
+    @Override
+    public void lookingSurfaces(boolean hasSurfaces) {
+        //Callback function to notify application that at least a surface has detected by AR framework
+    }
+    
+    //Other standard methods of libGDX ApplicationListener are also supported
+    //resize, pause, resume, dispose
+}
+```
 
 ## TODO
 
