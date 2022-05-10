@@ -22,20 +22,22 @@ public interface GdxAR {
      *
      * @param x position in screen coordinate
      * @param y position in screen coordinate
-     * @return a new GdxAnchor object or null if no plane was hit
+     * @param planeType filter hit test with a specific plane type
+     * @return a new {@link GdxAnchor} object or null if no plane was hit
      */
     @Null
-    GdxAnchor requestHitPlaneAnchor(float x, float y);
+    GdxAnchor requestHitPlaneAnchor(float x, float y, GdxPlaneType planeType);
 
     /**
      * Request a pose from an hit plane check.
      *
      * @param x position in screen coordinate
      * @param y position in screen coordinate
-     * @return a new GdxPose or null if no plane was hit
+     * @param planeType filter hit test with a specific plane type
+     * @return a new {@link GdxPose} or null if no plane was hit
      */
     @Null
-    GdxPose requestHitPlanePose(float x, float y);
+    GdxPose requestHitPlanePose(float x, float y, GdxPlaneType planeType);
 
     /**
      * Usually, camera autofocus is disabled by default for quality reason, enable only when needed.

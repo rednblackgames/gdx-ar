@@ -11,5 +11,7 @@ public enum GdxPlaneType {
     /** A horizontal plane facing downward (e.g. a ceiling). */
     HORIZONTAL_DOWNWARD_FACING,
     /** A vertical plane (e.g. a wall). */
-    VERTICAL;
+    VERTICAL,
+    /** Used for hit plane test */
+    ANY
 }

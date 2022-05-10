@@ -163,20 +163,44 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         debugModelBatch = new ModelBatch(new DebugShaderProvider());
 
         sessionConfig = new Config(getSession());
-        // Check whether the user's device supports the Depth API.
-        boolean isDepthSupported = getSession().isDepthModeSupported(Config.DepthMode.AUTOMATIC);
-        if (isDepthSupported) {
-            sessionConfig.setDepthMode(Config.DepthMode.AUTOMATIC);
-        }
         sessionConfig.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
-        sessionConfig.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
+
+        //Setup Depth
+        if (gdxARConfiguration.enableDepth) {
+            // Check whether the user's device supports the Depth API.
+            boolean isDepthSupported = getSession().isDepthModeSupported(Config.DepthMode.AUTOMATIC);
+            if (isDepthSupported) {
+                sessionConfig.setDepthMode(Config.DepthMode.AUTOMATIC);
+            }
+        }
+
+        //Setup Plane Finding Mode
+        switch (gdxARConfiguration.planeFindingMode) {
+            case DISABLED:
+                sessionConfig.setPlaneFindingMode(Config.PlaneFindingMode.DISABLED);
+                break;
+            case HORIZONTAL:
+                sessionConfig.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
+                break;
+            case VERTICAL:
+                sessionConfig.setPlaneFindingMode(Config.PlaneFindingMode.VERTICAL);
+                break;
+            case HORIZONTAL_AND_VERTICAL:
+                sessionConfig.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL);
+                break;
+        }
+
+        //Setup light estimation type
         switch (gdxARConfiguration.lightEstimationMode) {
             case DISABLED:
                 sessionConfig.setLightEstimationMode(Config.LightEstimationMode.DISABLED);
+                break;
             case AMBIENT_INTENSITY:
                 sessionConfig.setLightEstimationMode(Config.LightEstimationMode.AMBIENT_INTENSITY);
+                break;
             case ENVIRONMENTAL_HDR:
                 sessionConfig.setLightEstimationMode(Config.LightEstimationMode.ENVIRONMENTAL_HDR);
+                break;
         }
 
         getSession().configure(sessionConfig);
@@ -314,7 +338,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
     @Override
     @Null
-    public GdxAnchor requestHitPlaneAnchor(float x, float y) {
+    public GdxAnchor requestHitPlaneAnchor(float x, float y, GdxPlaneType planeType) {
         if (!renderAR) return null;
 
         ARCoreGraphics arCoreGraphics = (ARCoreGraphics) Gdx.graphics;
@@ -325,7 +349,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
             Pose pose = hit.getHitPose();
             if (trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(pose)) {
                 Plane plane = (Plane) trackable;
-                if (plane.getType() != Plane.Type.HORIZONTAL_UPWARD_FACING) continue;
+                if (planeType != GdxPlaneType.ANY && ARCoreToGdxAR.map(plane.getType()) != planeType) continue;
                 Anchor newAnchor = plane.createAnchor(pose);
                 return ARCoreToGdxAR.createGdxAnchor(newAnchor);
             }
@@ -335,7 +359,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
     @Override
     @Null
-    public GdxPose requestHitPlanePose(float x, float y) {
+    public GdxPose requestHitPlanePose(float x, float y, GdxPlaneType planeType) {
         if (!renderAR) return null;
 
         ARCoreGraphics arCoreGraphics = (ARCoreGraphics) Gdx.graphics;
@@ -346,7 +370,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
             Pose pose = hit.getHitPose();
             if (trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(pose)) {
                 Plane plane = (Plane) trackable;
-                if (plane.getType() != Plane.Type.HORIZONTAL_UPWARD_FACING) continue;
+                if (planeType != GdxPlaneType.ANY && ARCoreToGdxAR.map(plane.getType()) != planeType) continue;
                 GdxPose gdxPose = Pools.obtain(GdxPose.class);
                 ARCoreToGdxAR.map(pose, gdxPose);
                 return gdxPose;
@@ -378,8 +402,9 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         // Check if we detected at least one plane. If so, hide the loading message.
         if (!hasSurface) {
             for (Plane plane : surfaces) {
-                if (plane.getType() == Plane.Type.HORIZONTAL_UPWARD_FACING
-                        && plane.getTrackingState() == TrackingState.TRACKING) {
+                Plane.Type type = plane.getType();
+                TrackingState trackingState = plane.getTrackingState();
+                if (type != Plane.Type.HORIZONTAL_DOWNWARD_FACING && trackingState == TrackingState.TRACKING) {
                     gdxArApplicationListener.lookingSurfaces(true);
                     hasSurface = true;
                 }
@@ -397,8 +422,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
             // check for planes that are no longer valid
             if (plane.getSubsumedBy() != null
-                    || plane.getType() != Plane.Type.HORIZONTAL_UPWARD_FACING
-                    || plane.getTrackingState() == TrackingState.STOPPED
+                    || plane.getType() == Plane.Type.HORIZONTAL_DOWNWARD_FACING
+                    || plane.getTrackingState() != TrackingState.TRACKING
                     || plane.getPolygon().capacity() == 0) {
                 continue;
             }
@@ -408,8 +433,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 continue;
             }
             ModelInstance instance = new ModelInstance(planeModel);
-            instance.transform.setToTranslation(
-                    plane.getCenterPose().tx(), plane.getCenterPose().ty(), plane.getCenterPose().tz());
+            Pose pose = plane.getCenterPose();
+            instance.transform.set(pose.tx(), pose.ty(), pose.tz(), pose.qx(), pose.qy(), pose.qz(), pose.qw());
             planeInstances.add(instance);
         }
         modelBatch.render(planeInstances);
