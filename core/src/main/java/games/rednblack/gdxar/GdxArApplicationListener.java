@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.Camera;
  *
  * @author fgnm
  */
-public abstract class GdxArApplicationListener {
+public abstract class GdxArApplicationListener implements ApplicationListener {
     private GdxAR arAPI;
 
     /** Rendering callback that contains information from AR world for the current frame */
@@ -17,6 +17,8 @@ public abstract class GdxArApplicationListener {
 
     /** Callback to notify that the AR framework has start tracking at least one surface */
     public void lookingSurfaces(boolean hasSurfaces) { }
+
+    public void create() { }
 
     /** Standard libGDX create callback similar to  {@link ApplicationListener#create()}
      * with information on AR camera */
