@@ -302,10 +302,10 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                     Gdx.gl.glColorMask(true, true, true, true);
                 } catch (NotYetAvailableException e) {
                     e.printStackTrace();
-                }*/
+                }
 
                 Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-                Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+                Gdx.gl.glEnable(GL20.GL_CULL_FACE);*/
 
                 if (gdxARConfiguration.debugMode) {
                     debugModelBatch.begin(arCamera);

@@ -10,8 +10,11 @@ import java.io.InputStream;
  * @author fgnm
  */
 public class RawAugmentedImageAsset implements Pool.Poolable {
+    /** Tag name of the image */
     public String name;
+    /** Input stream where to read the image data */
     public InputStream inputStream;
+    /** Width of the image in real world space */
     public float widthInMeter = 1f;
 
     @Override
