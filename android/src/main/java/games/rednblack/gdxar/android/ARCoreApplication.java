@@ -205,7 +205,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
         getSession().configure(sessionConfig);
 
-        gdxArApplicationListener.create(arCamera);
+        gdxArApplicationListener.create();
     }
 
     @Override

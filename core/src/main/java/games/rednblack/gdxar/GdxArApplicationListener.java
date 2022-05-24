@@ -22,10 +22,6 @@ public abstract class GdxArApplicationListener implements ApplicationListener {
 
     /** Standard libGDX create callback similar to  {@link ApplicationListener#create()}
      * with information on AR camera */
-    public void create(Camera arCamera) { }
-
-    /** Standard libGDX create callback similar to  {@link ApplicationListener#create()}
-     * with information on AR camera */
     public void render () { }
 
     /** Standard libGDX callback similar to {@link ApplicationListener#resize(int, int)}*/
