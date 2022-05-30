@@ -134,12 +134,6 @@ public class ARSessionSupport implements DefaultLifecycleObserver {
             setDisplayGeometry(rotation, width, height);
         }
 
-        try {
-            session.resume();
-        } catch (CameraNotAvailableException e) {
-            Log.e(TAG, "Exception resuming session", e);
-            return;
-        }
         setStatus(ARStatus.Ready);
     }
 
@@ -151,12 +145,6 @@ public class ARSessionSupport implements DefaultLifecycleObserver {
         if (CameraPermissionHelper.hasCameraPermission(activity)) {
             if (session == null) {
                 initializeARCore();
-            } else {
-                try {
-                    session.resume();
-                } catch (CameraNotAvailableException e) {
-                    Log.e(TAG, "Exception resuming session", e);
-                }
             }
         } else {
             requestCameraPermission();

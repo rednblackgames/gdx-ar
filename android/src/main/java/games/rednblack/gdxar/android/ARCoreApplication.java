@@ -328,6 +328,13 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
     @Override
     public void resume() {
+        if (renderAR) {
+            try {
+                getSession().resume();
+            } catch (CameraNotAvailableException e) {
+                e.printStackTrace();
+            }
+        }
         gdxArApplicationListener.resume();
     }
 
