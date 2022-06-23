@@ -14,4 +14,15 @@ public class GdxARConfiguration {
     public boolean enableDepth = false;
     /** Enable internal debug mode */
     public boolean debugMode = false;
+
+    public GdxARConfiguration() {
+
+    }
+
+    public GdxARConfiguration(GdxARConfiguration configuration) {
+        lightEstimationMode = configuration.lightEstimationMode;
+        planeFindingMode = configuration.planeFindingMode;
+        enableDepth = configuration.enableDepth;
+        debugMode = configuration.debugMode;
+    }
 }

@@ -1,13 +1,18 @@
 package games.rednblack.gdxar.android;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.google.ar.core.Frame;
+import com.google.ar.core.exceptions.NotYetAvailableException;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -19,10 +24,14 @@ import java.nio.IntBuffer;
  * @author claywilkinson
  */
 class BackgroundRenderer {
-    private final ShaderProgram shader;
+    private final ShaderProgram shader, depthShader;
     private final Mesh mesh;
     private final IntBuffer intbuf;
     private final int[] saveFlags;
+
+    private byte[] depthBytes = new byte[1];
+    //private Texture depthTexture;
+    private DepthTextureHandler depthTexture;
 
     // The Shader class in GDX is aware of some common uniform and attribute names.
     // These are used to make setting the values when drawing "automatic".
@@ -51,8 +60,21 @@ class BackgroundRenderer {
                     + "    gl_FragColor = texture2D(sTexture, v_TexCoord);\n"
                     + "}";
 
+    private static final String depthFragmentShaderCode =
+                    "precision mediump float;\n"
+                    + "varying vec2 v_TexCoord;\n"
+                    + "uniform sampler2D sTexture;\n"
+                    + "\n"
+                    + "\n"
+                    + "void main() {\n"
+                    + "    gl_FragColor = texture2D(sTexture, v_TexCoord);\n"
+                    + "}";
+
     public BackgroundRenderer() {
+        depthTexture = new DepthTextureHandler();
+        depthTexture.createOnGlThread();
         shader = new ShaderProgram(vertexShaderCode, fragmentShaderCode);
+        depthShader = new ShaderProgram(vertexShaderCode, depthFragmentShaderCode);
 
         mesh = new Mesh(true, 4, 0, VertexAttribute.Position(), VertexAttribute.TexCoords(0));
 
@@ -90,5 +112,13 @@ class BackgroundRenderer {
         }
         gl.glDepthMask(saveFlags[1] == GL20.GL_TRUE);
         gl.glDepthFunc(saveFlags[2]);
+    }
+
+    public void renderDepth(Frame frame) {
+        depthTexture.update(frame);
+        Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
+        Gdx.gl.glBindTexture(GLES20.GL_TEXTURE_2D, depthTexture.getDepthTexture());
+        depthShader.bind();
+        mesh.render(depthShader, GL20.GL_TRIANGLE_STRIP);
     }
 }

@@ -3,10 +3,15 @@ package games.rednblack.gdxar.android;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import android.media.Image;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -29,9 +34,11 @@ import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import com.google.ar.core.exceptions.CameraNotAvailableException;
+import com.google.ar.core.exceptions.NotYetAvailableException;
 import games.rednblack.gdxar.*;
 import games.rednblack.gdxar.util.PlaneModel;
 import games.rednblack.gdxar.android.util.ARCoreToGdxAR;
@@ -69,7 +76,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     public ARCoreApplication(GdxArApplicationListener gdxArApplicationListener, GdxARConfiguration gdxARConfiguration) {
         this.gdxArApplicationListener = gdxArApplicationListener;
         this.gdxArApplicationListener.setArAPI(this);
-        this.gdxARConfiguration = gdxARConfiguration;
+        this.gdxARConfiguration = new GdxARConfiguration(gdxARConfiguration);
 
         frameInstance = new GdxFrame();
     }
@@ -172,6 +179,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
             if (isDepthSupported) {
                 sessionConfig.setDepthMode(Config.DepthMode.AUTOMATIC);
             }
+            gdxARConfiguration.enableDepth = isDepthSupported;
         }
 
         //Setup Plane Finding Mode
@@ -293,19 +301,23 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                     frameInstance.lightIntensity = colorCorrection[3];
                 }
 
-                //TODO draw depth mask
-                /*Gdx.gl.glDepthMask(true);
-                try {
-                    Image depth = frame.acquireRawDepthConfidenceImage();
+                if (gdxARConfiguration.enableDepth) {
+                    /*Gdx.gl.glDepthMask(true);
+                    Gdx.gl.glDepthFunc(GL20.GL_LESS);
+                    Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+                    Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+                    Gdx.gl.glCullFace(GL20.GL_FRONT_AND_BACK);
                     Gdx.gl.glColorMask(false, false, false, false);
-                    //glDrawElements
-                    Gdx.gl.glColorMask(true, true, true, true);
-                } catch (NotYetAvailableException e) {
-                    e.printStackTrace();
-                }
 
-                Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-                Gdx.gl.glEnable(GL20.GL_CULL_FACE);*/
+                    try {
+                        backgroundRenderer.renderDepth(frame);
+                    } catch (NotYetAvailableException e) {
+                        e.printStackTrace();
+                    }
+
+                    Gdx.gl.glColorMask(true, true, true, true);
+                    Gdx.gl.glDepthFunc(GL20.GL_EQUAL);*/
+                }
 
                 if (gdxARConfiguration.debugMode) {
                     debugModelBatch.begin(arCamera);
