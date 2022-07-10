@@ -315,13 +315,14 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 }
 
                 if (gdxARConfiguration.debugMode) {
+                    Gdx.gl.glLineWidth(10);
                     debugModelBatch.begin(arCamera);
                     debugModelBatch.render(planeInstances);
+                    debugModelBatch.end();
+                    Gdx.gl.glLineWidth(1);
                 }
 
                 gdxArApplicationListener.renderARModels(frameInstance);
-
-                if (gdxARConfiguration.debugMode) debugModelBatch.end();
             }
         }
 
