@@ -1,16 +1,6 @@
 package games.rednblack.gdxar.android;
 
-import static android.opengl.GLES20.GL_CLAMP_TO_EDGE;
-import static android.opengl.GLES20.GL_TEXTURE_2D;
-import static android.opengl.GLES20.GL_TEXTURE_MAG_FILTER;
-import static android.opengl.GLES20.GL_TEXTURE_MIN_FILTER;
-import static android.opengl.GLES20.GL_TEXTURE_WRAP_S;
-import static android.opengl.GLES20.GL_TEXTURE_WRAP_T;
-import static android.opengl.GLES20.GL_UNSIGNED_BYTE;
-import static android.opengl.GLES20.glBindTexture;
-import static android.opengl.GLES20.glGenTextures;
-import static android.opengl.GLES20.glTexImage2D;
-import static android.opengl.GLES20.glTexParameteri;
+import static android.opengl.GLES20.*;
 import static android.opengl.GLES30.GL_LINEAR;
 import static android.opengl.GLES30.GL_RG;
 import static android.opengl.GLES30.GL_RG8;
@@ -48,19 +38,33 @@ public final class DepthTextureHandler {
     public void update(final Frame frame) {
         try {
             Image depthImage = frame.acquireDepthImage16Bits();
-            depthTextureWidth = depthImage.getWidth();
-            depthTextureHeight = depthImage.getHeight();
             glBindTexture(GL_TEXTURE_2D, depthTextureId);
-            glTexImage2D(
-                    GL_TEXTURE_2D,
-                    0,
-                    GL_RG8,
-                    depthTextureWidth,
-                    depthTextureHeight,
-                    0,
-                    GL_RG,
-                    GL_UNSIGNED_BYTE,
-                    depthImage.getPlanes()[0].getBuffer());
+
+            if (depthTextureWidth == -1) {
+                depthTextureWidth = depthImage.getWidth();
+                depthTextureHeight = depthImage.getHeight();
+                glTexImage2D(
+                        GL_TEXTURE_2D,
+                        0,
+                        GL_RG8,
+                        depthTextureWidth,
+                        depthTextureHeight,
+                        0,
+                        GL_RG,
+                        GL_UNSIGNED_BYTE,
+                        depthImage.getPlanes()[0].getBuffer());
+            } else {
+                glTexSubImage2D(
+                        GL_TEXTURE_2D,
+                        0,
+                        0, 0,
+                        depthTextureWidth,
+                        depthTextureHeight,
+                        GL_RG,
+                        GL_UNSIGNED_BYTE,
+                        depthImage.getPlanes()[0].getBuffer());
+            }
+
             depthImage.close();
         } catch (NotYetAvailableException e) {
             // This normally means that depth data is not available yet.

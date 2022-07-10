@@ -3,44 +3,31 @@ package games.rednblack.gdxar.android;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import android.media.Image;
-import android.opengl.GLES20;
-import android.opengl.GLUtils;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
+import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.model.NodePart;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.Pools;
-import com.google.ar.core.Anchor;
-import com.google.ar.core.AugmentedImage;
-import com.google.ar.core.AugmentedImageDatabase;
-import com.google.ar.core.Config;
-import com.google.ar.core.Frame;
-import com.google.ar.core.HitResult;
-import com.google.ar.core.LightEstimate;
-import com.google.ar.core.Plane;
-import com.google.ar.core.Pose;
-import com.google.ar.core.Session;
-import com.google.ar.core.Trackable;
-import com.google.ar.core.TrackingState;
+import com.google.ar.core.*;
 
 import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Collection;
+import java.util.List;
 
 import com.google.ar.core.exceptions.CameraNotAvailableException;
-import com.google.ar.core.exceptions.NotYetAvailableException;
 import games.rednblack.gdxar.*;
-import games.rednblack.gdxar.util.PlaneModel;
 import games.rednblack.gdxar.android.util.ARCoreToGdxAR;
 import games.rednblack.gdxar.util.DebugShaderProvider;
 import games.rednblack.gdxar.util.RawAugmentedImageAsset;
@@ -72,6 +59,11 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     protected boolean hasSurface = false;
     protected boolean renderAR = false;
     protected final GdxFrame frameInstance;
+
+    private final Array<ModelInstance> planeInstances = new Array<>();
+    private final IntMap<ModelInstance> polygonsCache = new IntMap<>();
+    private final ModelBuilder builder = new ModelBuilder();
+    private final float[] tmpVerts = new float[14];
 
     public ARCoreApplication(GdxArApplicationListener gdxArApplicationListener, GdxARConfiguration gdxARConfiguration) {
         this.gdxArApplicationListener = gdxArApplicationListener;
@@ -257,10 +249,13 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 Matrix4.mul(arCamera.combined.val, arCamera.view.val);
 
                 frameInstance.reset();
+                planeInstances.clear();
 
                 for (Plane plane : surfaces) {
                     GdxPlane gdxPlane = ARCoreToGdxAR.createGdxPlane(plane);
                     frameInstance.addPlane(gdxPlane);
+                    if (gdxARConfiguration.debugMode)
+                        addPlane(plane);
                 }
 
                 for (Anchor anchor : frame.getUpdatedAnchors()) {
@@ -321,7 +316,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
                 if (gdxARConfiguration.debugMode) {
                     debugModelBatch.begin(arCamera);
-                    drawPlanes(debugModelBatch, surfaces);
+                    debugModelBatch.render(planeInstances);
                 }
 
                 gdxArApplicationListener.renderARModels(frameInstance);
@@ -363,12 +358,20 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         ARCoreGraphics arCoreGraphics = (ARCoreGraphics) Gdx.graphics;
         Frame frame = arCoreGraphics.getCurrentFrame();
 
-        for (HitResult hit : frame.hitTest(x, y)) {
+        List<HitResult> hitResultList = frame.hitTest(x, y);
+        if (hitResultList.size() == 0) return null;
+
+        for (HitResult hit : hitResultList) {
             Trackable trackable = hit.getTrackable();
             Pose pose = hit.getHitPose();
-            if (trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(pose)) {
+            if (trackable instanceof Plane) {
                 Plane plane = (Plane) trackable;
-                if (planeType != GdxPlaneType.ANY && ARCoreToGdxAR.map(plane.getType()) != planeType) continue;
+                if (plane.getSubsumedBy() != null
+                        || !plane.isPoseInPolygon(pose)
+                        || (planeType != GdxPlaneType.ANY && ARCoreToGdxAR.map(plane.getType()) != planeType)
+                        || plane.getTrackingState() != TrackingState.TRACKING
+                        || plane.getPolygon().capacity() == 0) continue;
+
                 Anchor newAnchor = plane.createAnchor(pose);
                 return ARCoreToGdxAR.createGdxAnchor(newAnchor);
             }
@@ -384,12 +387,20 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         ARCoreGraphics arCoreGraphics = (ARCoreGraphics) Gdx.graphics;
         Frame frame = arCoreGraphics.getCurrentFrame();
 
-        for (HitResult hit : frame.hitTest(x, y)) {
+        List<HitResult> hitResultList = frame.hitTest(x, y);
+        if (hitResultList.size() == 0) return null;
+
+        for (HitResult hit : hitResultList) {
             Trackable trackable = hit.getTrackable();
             Pose pose = hit.getHitPose();
-            if (trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(pose)) {
+            if (trackable instanceof Plane) {
                 Plane plane = (Plane) trackable;
-                if (planeType != GdxPlaneType.ANY && ARCoreToGdxAR.map(plane.getType()) != planeType) continue;
+                if (plane.getSubsumedBy() != null
+                        || !plane.isPoseInPolygon(pose)
+                        || (planeType != GdxPlaneType.ANY && ARCoreToGdxAR.map(plane.getType()) != planeType)
+                        || plane.getTrackingState() != TrackingState.TRACKING
+                        || plane.getPolygon().capacity() == 0) continue;
+
                 GdxPose gdxPose = Pools.obtain(GdxPose.class);
                 ARCoreToGdxAR.map(pose, gdxPose);
                 return gdxPose;
@@ -432,31 +443,64 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         return hasSurface;
     }
 
-    Array<ModelInstance> planeInstances = new Array<>();
-    /** Draws the planes detected. */
-    private void drawPlanes(ModelBatch modelBatch,  Collection<Plane> surfaces) {
-        planeInstances.clear();
-        int index = 0;
-        for (Plane plane : surfaces) {
-
-            // check for planes that are no longer valid
-            if (plane.getSubsumedBy() != null
-                    || plane.getType() == Plane.Type.HORIZONTAL_DOWNWARD_FACING
-                    || plane.getTrackingState() != TrackingState.TRACKING
-                    || plane.getPolygon().capacity() == 0) {
-                continue;
-            }
-            // New plane
-            Model planeModel = PlaneModel.createPlane(plane.getPolygon(), plane.getExtentX(), plane.getExtentZ(), index++);
-            if (planeModel == null) {
-                continue;
-            }
-            ModelInstance instance = new ModelInstance(planeModel);
-            Pose pose = plane.getCenterPose();
-            instance.transform.set(pose.tx(), pose.ty(), pose.tz(), pose.qx(), pose.qy(), pose.qz(), pose.qw());
-            planeInstances.add(instance);
+    private void addPlane(Plane plane) {
+        // check for planes that are no longer valid
+        if (plane.getSubsumedBy() != null
+                || plane.getType() == Plane.Type.HORIZONTAL_DOWNWARD_FACING
+                || plane.getTrackingState() != TrackingState.TRACKING
+                || plane.getPolygon().capacity() == 0) {
+            return;
         }
-        modelBatch.render(planeInstances);
+
+        FloatBuffer polygon = plane.getPolygon();
+        ModelInstance m = getPolygonModel(polygon.limit() / 2);
+        updateVertices(m, polygon, Color.YELLOW);
+
+        Pose pose = plane.getCenterPose();
+        m.transform.set(pose.tx(), pose.ty(), pose.tz(), pose.qx(), pose.qy(), pose.qz(), pose.qw());
+        planeInstances.add(m);
+    }
+
+    private ModelInstance getPolygonModel(int vertexCount) {
+        ModelInstance model = polygonsCache.get(vertexCount);
+        if (model != null) return model;
+
+        builder.begin();
+        for (int i = 0; i < vertexCount; i++) {
+            MeshPartBuilder meshPartBuilder = builder.part("line" + i, GL20.GL_LINES, 3, new Material());
+            meshPartBuilder.setColor(Color.WHITE);
+            meshPartBuilder.line(0, 0, 0, 0, 0, 0);
+        }
+
+        model = new ModelInstance(builder.end());
+        polygonsCache.put(vertexCount, model);
+        return model;
+    }
+
+    private void updateVertices(ModelInstance modelInstance, FloatBuffer vertices, Color color) {
+        Node node = modelInstance.nodes.get(0);
+        int verticesCount = vertices.limit() / 2;
+        for (int i = 0; i < verticesCount; i++) {
+            int j = i == 0 ? verticesCount - 1 : i - 1;
+            NodePart line = node.parts.get(i);
+            MeshPart lineMesh = line.meshPart;
+            Mesh mesh = lineMesh.mesh;
+            tmpVerts[0] = vertices.get(j * 2);
+            tmpVerts[1] = 0.0f;
+            tmpVerts[2] = vertices.get((j * 2) + 1);
+            tmpVerts[3] = color.r;
+            tmpVerts[4] = color.g;
+            tmpVerts[5] = color.b;
+            tmpVerts[6] = color.a;
+            tmpVerts[7] = vertices.get(i * 2);
+            tmpVerts[8] = 0.0f;
+            tmpVerts[9] = vertices.get((i * 2) + 1);
+            tmpVerts[10] = color.r;
+            tmpVerts[11] = color.g;
+            tmpVerts[12] = color.b;
+            tmpVerts[13] = color.a;
+            mesh.updateVertices(i * 14, tmpVerts);
+        }
     }
 }
 

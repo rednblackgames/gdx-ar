@@ -1,17 +1,11 @@
 package games.rednblack.gdxar.android;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.google.ar.core.Frame;
-import com.google.ar.core.exceptions.NotYetAvailableException;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -119,6 +113,7 @@ class BackgroundRenderer {
         Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
         Gdx.gl.glBindTexture(GLES20.GL_TEXTURE_2D, depthTexture.getDepthTexture());
         depthShader.bind();
+        depthShader.setUniformi("sTexture", 0);
         mesh.render(depthShader, GL20.GL_TRIANGLE_STRIP);
     }
 }

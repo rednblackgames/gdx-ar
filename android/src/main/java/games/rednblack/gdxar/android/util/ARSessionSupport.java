@@ -134,6 +134,16 @@ public class ARSessionSupport implements DefaultLifecycleObserver {
             setDisplayGeometry(rotation, width, height);
         }
 
+        //FIXME AutoFocus doesn't work if session is not resumed here first
+        try {
+            session.resume();
+        } catch (CameraNotAvailableException e) {
+            Log.e(TAG, "Exception resuming session", e);
+            return;
+        } finally {
+            session.pause();
+        }
+
         setStatus(ARStatus.Ready);
     }
 
