@@ -1,18 +1,10 @@
 package games.rednblack.gdxar.android.util;
 
-import android.Manifest;
-import android.content.Context;
 import android.util.Log;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
@@ -25,8 +17,6 @@ import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
-
-import games.rednblack.gdxar.android.CameraPermissionHelper;
 
 /**
  * ARCore session creation is a complex flow of exception handling, permission requesting, and
@@ -152,12 +142,8 @@ public class ARSessionSupport implements DefaultLifecycleObserver {
      * initializes ARCore.
      */
     public void onResume(@NonNull LifecycleOwner owner) {
-        if (CameraPermissionHelper.hasCameraPermission(activity)) {
-            if (session == null) {
-                initializeARCore();
-            }
-        } else {
-            requestCameraPermission();
+        if (session == null) {
+            initializeARCore();
         }
     }
 
@@ -184,19 +170,6 @@ public class ARSessionSupport implements DefaultLifecycleObserver {
     @Override
     public void onCreate(@NonNull LifecycleOwner owner) {
 
-    }
-
-    /**
-     * Start a fragment to handle the permissions.  This is done in a fragment to
-     * avoid entangling it with the base Activity.
-     */
-    private void requestCameraPermission() {
-        PermissionFragment fragment = new PermissionFragment();
-        fragment.setArSessionSupport(this);
-        FragmentManager mgr = activity.getSupportFragmentManager();
-        FragmentTransaction trans = mgr.beginTransaction();
-        trans.add(fragment, PermissionFragment.TAG);
-        trans.commit();
     }
 
     /**
@@ -255,40 +228,5 @@ public class ARSessionSupport implements DefaultLifecycleObserver {
      */
     public interface StatusChangeListener {
         void onStatusChanged();
-    }
-
-    /**
-     * PermissionFragment handles requesting the camera permission.
-     */
-    public static class PermissionFragment extends Fragment {
-        static final String TAG = "PermissionFragment";
-        private ARSessionSupport arSessionSupport;
-
-        private final ActivityResultLauncher<String> requestPermissionLauncher =
-                registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
-                    @Override
-                    public void onActivityResult(Boolean isGranted) {
-                        if (!CameraPermissionHelper.hasCameraPermission(PermissionFragment.this.getActivity())) {
-                            arSessionSupport.setStatus(ARStatus.NeedCameraPermission);
-                        } else {
-                            arSessionSupport.initializeARCore();
-                        }
-
-                        FragmentManager mgr = PermissionFragment.this.getParentFragmentManager();
-                        FragmentTransaction trans = mgr.beginTransaction();
-                        trans.remove(PermissionFragment.this);
-                        trans.commit();
-                    }
-                });
-
-        public void setArSessionSupport(ARSessionSupport arSessionSupport) {
-            this.arSessionSupport = arSessionSupport;
-        }
-
-        @Override
-        public void onAttach(@NonNull Context context) {
-            super.onAttach(context);
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
-        }
     }
 }

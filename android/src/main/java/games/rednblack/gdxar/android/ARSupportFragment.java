@@ -1,12 +1,9 @@
 package games.rednblack.gdxar.android;
 
-import android.Manifest;
 import android.content.Context;
 import android.os.Handler;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
@@ -32,7 +29,7 @@ public class ARSupportFragment extends Fragment {
 
     public ARSupportFragment() {
         // Required empty public constructor
-        handler = new Handler();
+        handler = new Handler(Looper.getMainLooper());
         future = new AcceptableFuture<>(handler);
     }
 
@@ -43,37 +40,12 @@ public class ARSupportFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        if (checkCameraPermission()) {
-            checkArCore();
-        }
+        checkArCore();
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-    }
-
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
-                @Override
-                public void onActivityResult(Boolean isGranted) {
-                    if (isGranted) {
-                        ARSupportFragment.this.checkArCore();
-                    } else {
-                        future.completeExceptionally(new IllegalStateException("Camera permission not granted"));
-                    }
-                }
-            });
-
-
-    private boolean checkCameraPermission() {
-        if (CameraPermissionHelper.hasCameraPermission(requireActivity())) {
-            return true;
-        }
-
-        requestPermissionLauncher.launch(Manifest.permission.CAMERA);
-        return false;
     }
 
     private void checkArCore() {
