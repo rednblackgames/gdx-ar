@@ -69,6 +69,13 @@ public interface GdxAR {
     boolean isRenderingAR();
 
     /**
+     * Check if AR is supported by the current device settings.
+     *
+     * @return true if AR is ready to be used.
+     */
+    boolean isARAllowed();
+
+    /**
      * Load an Augmented Images Database from a binary file.
      *
      * @param databaseStream InputStream of the database asset file.
