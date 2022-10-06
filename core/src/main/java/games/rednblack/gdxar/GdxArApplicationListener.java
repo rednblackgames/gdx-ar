@@ -1,7 +1,6 @@
 package games.rednblack.gdxar;
 
 import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.graphics.Camera;
 
 /**
  * Main interface to be used for libGDX core project. In receive canonical libGDX callbacks from
@@ -50,5 +49,15 @@ public abstract class GdxArApplicationListener implements ApplicationListener {
      */
     public GdxAR getArAPI() {
         return arAPI;
+    }
+
+    /** Callback to notify that AR rendering pipeline is started */
+    public void arPipelineBegin() {
+
+    }
+
+    /** Callback to notify that AR rendering pipeline is end */
+    public void arPipelineEnd() {
+
     }
 }

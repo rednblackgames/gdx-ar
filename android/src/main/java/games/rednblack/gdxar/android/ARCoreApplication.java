@@ -239,6 +239,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 return;
             }
 
+            gdxArApplicationListener.arPipelineBegin();
+
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
             backgroundRenderer.render(frame);
@@ -328,6 +330,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 }
 
                 gdxArApplicationListener.renderARModels(frameInstance);
+
+                gdxArApplicationListener.arPipelineEnd();
             }
         }
 
