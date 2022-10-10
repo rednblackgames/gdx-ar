@@ -8,6 +8,8 @@ import com.google.ar.core.*;
 
 import games.rednblack.gdxar.*;
 
+import java.nio.FloatBuffer;
+
 /**
  * Utility class that convert ARCore classes into GdxAR
  *
@@ -56,7 +58,11 @@ public class ARCoreToGdxAR {
         gdxPlane.extentX = plane.getExtentX();
         gdxPlane.extentZ = plane.getExtentZ();
         gdxPlane.type = ARCoreToGdxAR.map(plane.getType());
-
+        FloatBuffer polygon = plane.getPolygon();
+        gdxPlane.vertices.ensureCapacity(polygon.limit());
+        for (int i = 0; i < polygon.limit(); i++) {
+            gdxPlane.vertices.add(polygon.get(i));
+        }
         return gdxPlane;
     }
 

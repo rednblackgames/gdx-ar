@@ -15,14 +15,10 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntMap;
-import com.badlogic.gdx.utils.Null;
-import com.badlogic.gdx.utils.Pools;
+import com.badlogic.gdx.utils.*;
 import com.google.ar.core.*;
 
 import java.io.InputStream;
-import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.List;
 
@@ -262,7 +258,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                     GdxPlane gdxPlane = ARCoreToGdxAR.createGdxPlane(plane);
                     frameInstance.addPlane(gdxPlane);
                     if (gdxARConfiguration.debugMode)
-                        addPlane(plane);
+                        addPlane(plane, gdxPlane);
                 }
 
                 for (Anchor anchor : frame.getUpdatedAnchors()) {
@@ -453,7 +449,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         return hasSurface;
     }
 
-    private void addPlane(Plane plane) {
+    private void addPlane(Plane plane, GdxPlane gdxPlane) {
         // check for planes that are no longer valid
         if (plane.getSubsumedBy() != null
                 || plane.getType() == Plane.Type.HORIZONTAL_DOWNWARD_FACING
@@ -462,8 +458,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
             return;
         }
 
-        FloatBuffer polygon = plane.getPolygon();
-        ModelInstance m = getPolygonModel(polygon.limit() / 2);
+        FloatArray polygon = gdxPlane.vertices;
+        ModelInstance m = getPolygonModel(polygon.size / 2);
         updateVertices(m, polygon, Color.YELLOW);
 
         Pose pose = plane.getCenterPose();
@@ -487,9 +483,9 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         return model;
     }
 
-    private void updateVertices(ModelInstance modelInstance, FloatBuffer vertices, Color color) {
+    private void updateVertices(ModelInstance modelInstance, FloatArray vertices, Color color) {
         Node node = modelInstance.nodes.get(0);
-        int verticesCount = vertices.limit() / 2;
+        int verticesCount = vertices.size / 2;
         for (int i = 0; i < verticesCount; i++) {
             int j = i == 0 ? verticesCount - 1 : i - 1;
             NodePart line = node.parts.get(i);
