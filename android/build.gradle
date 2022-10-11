@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 apply from : 'publish.gradle'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
     buildToolsVersion "${buildTools}"
 
     defaultConfig {
@@ -33,7 +33,6 @@ android {
 dependencies {
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
 
-    implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.appcompat:appcompat:$appcompatVersion"
     implementation "com.google.ar:core:$arcoreVersion"
 

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
@@ -16,8 +17,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.backends.android.AndroidFragmentApplication;
 import com.badlogic.gdx.backends.android.surfaceview.FillResolutionStrategy;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 
 import games.rednblack.gdxar.GdxARConfiguration;
 import games.rednblack.gdxar.GdxArApplicationListener;
@@ -35,7 +34,6 @@ public class ARFragmentApplication extends AndroidFragmentApplication implements
 
     // ARCore specific stuff
     private ARSessionSupport sessionSupport;
-    private Snackbar messageSnackbar;
 
     // Implement the LifecycleOwner interface since AndroidApplication does not extend AppCompatActivity.
     // All this means is forward the events to the lifecycleRegistry object.
@@ -113,31 +111,8 @@ public class ARFragmentApplication extends AndroidFragmentApplication implements
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
-        messageSnackbar =
-                Snackbar.make(
-                        requireActivity().getWindow().getDecorView(),
-                        message + "\n",
-                        Snackbar.LENGTH_INDEFINITE);
-        messageSnackbar.getView().setBackgroundColor(0xbf323232);
-        if (finishOnDismiss) {
-            messageSnackbar.setAction(
-                    "Dismiss",
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            messageSnackbar.dismiss();
-                        }
-                    });
-            messageSnackbar.addCallback(
-                    new BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        @Override
-                        public void onDismissed(Snackbar transientBottomBar, int event) {
-                            super.onDismissed(transientBottomBar, event);
-                            requireActivity().finish();
-                        }
-                    });
-        }
-        messageSnackbar.show();
+        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show();
+        if (finishOnDismiss) requireActivity().finish();
     }
 
     /**

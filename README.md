@@ -27,14 +27,13 @@ Include android platform specific dependence:
 dependencies {
     implementation "games.rednblack.gdxar:android:$gdxARVersion"
     implementation "com.google.ar:core:$arcoreVersion"
-    implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.appcompat:appcompat:$appcompatVersion"
 }
 ```
 
-| gdx-ar | ARCore | Material | AppCompat |
-|--------|--------|----------|-----------|
-| 0.1    | 1.33.0 | 1.6.1    | 1.5.0     |
+| gdx-ar       | ARCore | AppCompat |
+|--------------|--------|-----------|
+| 0.1-SNAPSHOT | 1.33.0 |  1.5.1    |
 
 ARCore requires Min SDK 24.
 
