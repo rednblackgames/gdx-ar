@@ -89,4 +89,12 @@ public interface GdxAR {
      * @return map that link the index into database to the image name
      */
     IntMap<String> buildAugmentedImageDatabase(Array<RawAugmentedImageAsset> images);
+
+    /**
+     * Enable or disable surface geometry, in same cases getting geometry info from backend AR Framework may result
+     * in an additional overhead to copy geometry data from ARCore/ARKit to GdxAR.
+     *
+     * @param geometryEnabled enable/disable geometry data
+     */
+    void enableSurfaceGeometry(boolean geometryEnabled);
 }

@@ -50,7 +50,7 @@ public class ARCoreToGdxAR {
         return augmentedImage;
     }
 
-    public static GdxPlane createGdxPlane(Plane plane) {
+    public static GdxPlane createGdxPlane(Plane plane, boolean enableGeometry) {
         GdxPlane gdxPlane = Pools.obtain(GdxPlane.class);
         Pose pose = plane.getCenterPose();
         ARCoreToGdxAR.map(pose, gdxPlane.gdxPose);
@@ -58,10 +58,12 @@ public class ARCoreToGdxAR {
         gdxPlane.extentX = plane.getExtentX();
         gdxPlane.extentZ = plane.getExtentZ();
         gdxPlane.type = ARCoreToGdxAR.map(plane.getType());
-        FloatBuffer polygon = plane.getPolygon();
-        gdxPlane.vertices.ensureCapacity(polygon.limit());
-        for (int i = 0; i < polygon.limit(); i++) {
-            gdxPlane.vertices.add(polygon.get(i));
+        if (enableGeometry) {
+            FloatBuffer polygon = plane.getPolygon();
+            gdxPlane.vertices.ensureCapacity(polygon.limit());
+            for (int i = 0; i < polygon.limit(); i++) {
+                gdxPlane.vertices.add(polygon.get(i));
+            }
         }
         return gdxPlane;
     }

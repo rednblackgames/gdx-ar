@@ -54,6 +54,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
     protected boolean hasSurface = false;
     protected boolean renderAR = false;
+    protected boolean enableSurfaceGeometry = false;
     protected final GdxFrame frameInstance;
 
     private final Array<ModelInstance> planeInstances = new Array<>();
@@ -255,7 +256,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 planeInstances.clear();
 
                 for (Plane plane : surfaces) {
-                    GdxPlane gdxPlane = ARCoreToGdxAR.createGdxPlane(plane);
+                    GdxPlane gdxPlane = ARCoreToGdxAR.createGdxPlane(plane, enableSurfaceGeometry);
                     frameInstance.addPlane(gdxPlane);
                     if (gdxARConfiguration.debugMode)
                         addPlane(plane, gdxPlane);
@@ -337,6 +338,11 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     @Override
     public void pause() {
         gdxArApplicationListener.pause();
+    }
+
+    @Override
+    public void enableSurfaceGeometry(boolean geometryEnabled) {
+        enableSurfaceGeometry = geometryEnabled;
     }
 
     @Override
