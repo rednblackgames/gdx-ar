@@ -1,8 +1,11 @@
 package games.rednblack.gdxar.android;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import android.view.LayoutInflater;
+import android.widget.FrameLayout;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
@@ -25,6 +28,7 @@ import java.util.List;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import games.rednblack.gdxar.*;
 import games.rednblack.gdxar.android.util.ARCoreToGdxAR;
+import games.rednblack.gdxar.android.util.InstructionsController;
 import games.rednblack.gdxar.util.DebugShaderProvider;
 import games.rednblack.gdxar.util.RawAugmentedImageAsset;
 
@@ -62,6 +66,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     private final ModelBuilder builder = new ModelBuilder();
     private final float[] tmpVerts = new float[14];
 
+    private InstructionsController instructionsController;
+
     public ARCoreApplication(GdxArApplicationListener gdxArApplicationListener, GdxARConfiguration gdxARConfiguration) {
         this.gdxArApplicationListener = gdxArApplicationListener;
         this.gdxArApplicationListener.setArAPI(this);
@@ -77,14 +83,17 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         if (renderAR) {
             try {
                 getSession().resume();
+                instructionsController.setVisible(true);
                 this.renderAR = true;
             } catch (CameraNotAvailableException e) {
                 this.renderAR = false;
+                instructionsController.setVisible(false);
                 e.printStackTrace();
             }
         } else {
             getSession().pause();
             this.renderAR = false;
+            instructionsController.setVisible(false);
         }
     }
 
@@ -208,6 +217,11 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         getSession().configure(sessionConfig);
 
         gdxArApplicationListener.create();
+    }
+
+    public void initializeInstructions(Activity activity, LayoutInflater inflater, FrameLayout frameLayout) {
+        instructionsController = new InstructionsController(activity, inflater, frameLayout);
+        instructionsController.setEnabled(InstructionsController.TYPE_PLANE_DISCOVERY, true);
     }
 
     @Override
@@ -431,12 +445,14 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
         // If not tracking, don't draw 3d objects.
         if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
             gdxArApplicationListener.lookingSurfaces(false);
+            instructionsController.setVisible(InstructionsController.TYPE_PLANE_DISCOVERY, true);
             hasSurface = false;
             return false;
         }
 
         if (surfaces.size() == 0) {
             gdxArApplicationListener.lookingSurfaces(false);
+            instructionsController.setVisible(InstructionsController.TYPE_PLANE_DISCOVERY, true);
             hasSurface = false;
             return false;
         }
@@ -448,6 +464,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 TrackingState trackingState = plane.getTrackingState();
                 if (type != Plane.Type.HORIZONTAL_DOWNWARD_FACING && trackingState == TrackingState.TRACKING) {
                     gdxArApplicationListener.lookingSurfaces(true);
+                    instructionsController.setVisible(InstructionsController.TYPE_PLANE_DISCOVERY, false);
                     hasSurface = true;
                 }
             }

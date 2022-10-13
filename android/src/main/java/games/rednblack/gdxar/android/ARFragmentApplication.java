@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.FrameLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -84,7 +85,11 @@ public class ARFragmentApplication extends AndroidFragmentApplication implements
         if (config == null) {
             config = new AndroidApplicationConfiguration();
         }
-        return initializeForView(getArApplication(), config);
+        FrameLayout frameLayout = new FrameLayout(getContext());
+        View rootView = initializeForView(getArApplication(), config);
+        frameLayout.addView(rootView);
+        getArApplication().initializeInstructions(getActivity(), inflater, frameLayout);
+        return frameLayout;
     }
 
     @Override
