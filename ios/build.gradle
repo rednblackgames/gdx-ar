@@ -1,0 +1,32 @@
+plugins {
+    id 'java-library'
+}
+
+apply from : 'publish.gradle'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+
+    api project(":core")
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+task dist(type: Jar) {
+    from files(sourceSets.main.output.classesDirs)
+    from files(sourceSets.main.output.resourcesDir)
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["--release", "7"]
+}

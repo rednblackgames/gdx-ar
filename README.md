@@ -8,6 +8,7 @@ Augmented Reality extension for libGDX. The library is composed by an abstractio
 ### Supported platforms
 
 - Android : [Google ARCore](https://developers.google.com/ar)
+- iOS : [Apple ARKit](https://developer.apple.com/augmented-reality/)
 
 
 ## How to use
@@ -22,7 +23,7 @@ dependencies {
 
 ### Android
 
-Include android platform specific dependence:
+Include Android platform specific dependence:
 ```Groovy
 dependencies {
     implementation "games.rednblack.gdxar:android:$gdxARVersion"
@@ -33,7 +34,7 @@ dependencies {
 
 | gdx-ar       | ARCore | AppCompat |
 |--------------|--------|-----------|
-| 0.1-SNAPSHOT | 1.33.0 |  1.5.1    |
+| 0.1-SNAPSHOT | 1.34.0 |  1.5.1    |
 
 ARCore requires Min SDK 24.
 
@@ -49,6 +50,30 @@ List of implemented ARCore features:
 - Augmented Images (and Augmented Images Database)
 - Light Estimation (AMBIENT_INTENSITY, ENVIRONMENTAL_HDR)
 - Camera autofocus
+- Basic Instruction View
+
+### iOS
+
+Include iOS platform specific dependence:
+```Groovy
+dependencies {
+    implementation "games.rednblack.gdxar:ios:$gdxARVersion"
+}
+```
+
+#### ARKit features
+
+List of implemented ARCore features:
+
+- Camera Preview
+- Plane Detection
+- Hit testing
+- Anchor and Pose
+- Full Tracking state
+- Augmented Images
+- Light Estimation (AMBIENT_INTENSITY)
+- Camera autofocus
+- Coaching view
 
 ## Basic Implementation
 
@@ -68,13 +93,16 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//Manifest.permission.CAMERA MUST be requested before trying to load AR
+		//It depends on how the app would handle this
+        
 		// Loads the fragment.  There is no layout for this fragment, so it is simply added.
 		ARSupportFragment supportFragment = new ARSupportFragment();
 
 		getSupportFragmentManager().beginTransaction().add(
 				supportFragment, ARSupportFragment.TAG).commitAllowingStateLoss();
 
-		applicationListener = new MainApplicationListener(this);
+		applicationListener = new MainApplicationListener();
 
 		// Add the listener to check for ARCore being supported and camera permissions are granted.
 		supportFragment.getArSupported().thenAccept(useAR -> {
@@ -170,10 +198,39 @@ public class MainApplicationListener extends GdxArApplicationListener {
 }
 ```
 
+### iOS (RoboVM)
+
+Basic `IOSLauncher` based on RoboVM to enable ARKit capabilities:
+
+```Java
+public class IOSLauncher extends IOSApplication.Delegate {
+
+    @Override
+    protected IOSApplication createApplication() {
+        IOSApplicationConfiguration configuration = new IOSApplicationConfiguration();
+        GdxARConfiguration gdxARConfiguration = new GdxARConfiguration();
+
+        GdxArApplicationListener applicationListener = new MainApplicationListener();
+        
+        ARKitApplication arKitApplication = new ARKitApplication(applicationListener, gdxARConfiguration);
+        IOSApplication iosApplication = new IOSApplication(arKitApplication, configuration);
+        //Enable Coaching View
+        arKitApplication.setIosApplication(iosApplication);
+        
+        return iosApplication;
+    }
+
+    public static void main(String[] argv) {
+        NSAutoreleasePool pool = new NSAutoreleasePool();
+        UIApplication.main(argv, null, IOSLauncher.class);
+        pool.close();
+    }
+}
+```
+
 ## TODO
 
-- ARCore Depth Testing: https://developers.google.com/ar/develop/depth
-- iOS Backend using ARKit
+- ARCore/ARKit Depth Testing i.e. https://developers.google.com/ar/develop/depth
 
 ### License
 

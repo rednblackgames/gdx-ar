@@ -61,7 +61,7 @@ afterEvaluate {
                 artifactId = artifact
                 pom {
                     name = "Augmented Reality extension for libGDX"
-                    description = "Augmented Reality extension for libGDX (android implemetation using Google's ARCore)"
+                    description = "Augmented Reality extension for libGDX (Android implemetation using Google's ARCore)"
                     url = "https://github.com/rednblackgames/gdx-ar"
                     licenses {
                         license {

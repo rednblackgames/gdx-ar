@@ -1,4 +1,5 @@
 rootProject.name = 'gdx-ar'
 include 'android'
 include 'core'
+include 'ios'
 
