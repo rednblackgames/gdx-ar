@@ -14,6 +14,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
+/**
+ * Background rendering for an ARKit. This renders the camera texture in the background of the scene.
+ *
+ * @author fgnm
+ */
 class BackgroundRenderer {
     private final ShaderProgram shader;
     private final Mesh mesh;

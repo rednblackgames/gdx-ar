@@ -79,6 +79,15 @@ import games.rednblack.gdxar.GdxPose;
 import games.rednblack.gdxar.util.DebugShaderProvider;
 import games.rednblack.gdxar.util.RawAugmentedImageAsset;
 
+/**
+ * ARKitApplication is the base class for the scene to render. Application specific code should be
+ * put in {@link GdxArApplicationListener}
+ *
+ * This class handles the basic boilerplate of rendering the background image, moving the camera
+ * based on the ARKit frame pose, and basic batch rendering.
+ *
+ * @author fgnm
+ */
 public class ARKitApplication implements ApplicationListener, GdxAR, ARSessionDelegate, ARCoachingOverlayViewDelegate {
     protected GdxArApplicationListener gdxArApplicationListener;
     protected GdxARConfiguration gdxARConfiguration;
@@ -592,5 +601,10 @@ public class ARKitApplication implements ApplicationListener, GdxAR, ARSessionDe
     @Override
     public void enableSurfaceGeometry(boolean geometryEnabled) {
         enableSurfaceGeometry = geometryEnabled;
+    }
+
+    @Override
+    public void setPowerSaveMode(boolean powerSaveMode) {
+
     }
 }

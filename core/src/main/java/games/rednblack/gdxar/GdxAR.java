@@ -97,4 +97,11 @@ public interface GdxAR {
      * @param geometryEnabled enable/disable geometry data
      */
     void enableSurfaceGeometry(boolean geometryEnabled);
+
+    /**
+     * Set common configuration to reduce memory and power usage in the AR framework
+     *
+     * @param powerSaveMode enable or disable power save mode
+     */
+    void setPowerSaveMode(boolean powerSaveMode);
 }

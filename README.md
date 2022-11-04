@@ -231,6 +231,7 @@ public class IOSLauncher extends IOSApplication.Delegate {
 ## TODO
 
 - ARCore/ARKit Depth Testing i.e. https://developers.google.com/ar/develop/depth
+- ARKit landscape camera transform
 
 ### License
 

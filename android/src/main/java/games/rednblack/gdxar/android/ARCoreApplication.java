@@ -23,6 +23,7 @@ import com.google.ar.core.*;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 
 import com.google.ar.core.exceptions.CameraNotAvailableException;
@@ -52,6 +53,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     protected GdxArApplicationListener gdxArApplicationListener;
     protected GdxARConfiguration gdxARConfiguration;
     protected Config sessionConfig;
+    protected CameraConfigFilter cameraConfigFilter;
 
     private final float[] cameraProjectionMatrix = new float[16];
     private final float[] colorCorrection = new float[4];
@@ -174,6 +176,8 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
         sessionConfig = new Config(getSession());
         sessionConfig.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
+
+        cameraConfigFilter = new CameraConfigFilter(getSession());
 
         //Setup Depth
         if (gdxARConfiguration.enableDepth) {
@@ -311,7 +315,6 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
                     lightEstimate.getColorCorrection(colorCorrection, 0);
                     frameInstance.lightColor.set(colorCorrection[0], colorCorrection[1], colorCorrection[2], 1);
-                    frameInstance.lightIntensity = colorCorrection[3];
                 }
 
                 if (gdxARConfiguration.enableDepth) {
@@ -374,6 +377,16 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     @Override
     public void dispose() {
         gdxArApplicationListener.dispose();
+    }
+
+    @Override
+    public void setPowerSaveMode(boolean powerSaveMode) {
+        CameraConfig.TargetFps newPowerSaveMode = powerSaveMode ? CameraConfig.TargetFps.TARGET_FPS_30 : CameraConfig.TargetFps.TARGET_FPS_60;
+        if (cameraConfigFilter.getTargetFps().contains(newPowerSaveMode)) return;
+        cameraConfigFilter.setTargetFps(EnumSet.of(newPowerSaveMode));
+        List<CameraConfig> cameraConfigList = getSession().getSupportedCameraConfigs(cameraConfigFilter);
+        if (cameraConfigList.size() > 0)
+            getSession().setCameraConfig(cameraConfigList.get(0));
     }
 
     @Override

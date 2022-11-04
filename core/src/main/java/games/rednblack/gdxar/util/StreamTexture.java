@@ -8,6 +8,12 @@ import com.badlogic.gdx.utils.Disposable;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
+/**
+ * Implementation of a Streaming texture from CPU buffer to OpenGL Texture, supports async streaming with
+ * Pixel Buffer Objects (only for OpenGL ES 3.0+)
+ *
+ * @author fgnm
+ */
 public class StreamTexture implements Disposable {
     private static final String TAG = "StreamTexture";
 

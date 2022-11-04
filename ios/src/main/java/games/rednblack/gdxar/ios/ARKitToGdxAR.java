@@ -25,6 +25,11 @@ import games.rednblack.gdxar.GdxPose;
 import games.rednblack.gdxar.GdxTrackingMethod;
 import games.rednblack.gdxar.GdxTrackingState;
 
+/**
+ * Utility class that convert ARKit classes into GdxAR
+ *
+ * @author fgnm
+ */
 public class ARKitToGdxAR {
 
     private static final float[] tmpMatrix = new float[16];

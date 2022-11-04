@@ -15,6 +15,12 @@ import org.robovm.rt.bro.ptr.VoidPtr;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Sets up the YUV textures used to render the camera. This is refactored out from the rendering of
+ * the background to decouple the background processing, such a rotation, from the actual rendering.
+ *
+ * @author fgnm
+ */
 public class BackgroundRendererHelper {
     private float[] tmpVertices;
 
