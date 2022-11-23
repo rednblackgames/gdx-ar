@@ -10,6 +10,7 @@ Augmented Reality extension for libGDX. The library is composed by an abstractio
 - Android : [Google ARCore](https://developers.google.com/ar)
 - iOS : [Apple ARKit](https://developer.apple.com/augmented-reality/)
 
+### [DEMO Application](https://github.com/fgnm/ARPlayground)
 
 ## How to use
 
@@ -63,7 +64,7 @@ dependencies {
 
 #### ARKit features
 
-List of implemented ARCore features:
+List of implemented ARKit features:
 
 - Camera Preview
 - Plane Detection
