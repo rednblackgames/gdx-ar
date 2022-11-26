@@ -298,7 +298,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                     float[] intensity = lightEstimate.getEnvironmentalHdrMainLightIntensity();
 
                     float mainLightIntensityScalar = Math.max(1.0f, Math.max(Math.max(intensity[0], intensity[1]), intensity[2]));
-                    frameInstance.lightIntensity = mainLightIntensityScalar;
+                    frameInstance.lightIntensity.set(intensity);
 
                     frameInstance.lightColor.set(intensity[0] / mainLightIntensityScalar, intensity[1] / mainLightIntensityScalar, intensity[2] / mainLightIntensityScalar, 1);
                     float[] direction = lightEstimate.getEnvironmentalHdrMainLightDirection();
@@ -446,6 +446,11 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
             }
         }
         return null;
+    }
+
+    @Override
+    public GdxLightEstimationMode getLightEstimationMode() {
+        return gdxARConfiguration.lightEstimationMode;
     }
 
     /**

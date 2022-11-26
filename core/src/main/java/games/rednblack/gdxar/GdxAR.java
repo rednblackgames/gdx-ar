@@ -104,4 +104,11 @@ public interface GdxAR {
      * @param powerSaveMode enable or disable power save mode
      */
     void setPowerSaveMode(boolean powerSaveMode);
+
+    /**
+     * Get the light estimation mode as specified in the configuration
+     *
+     * @return current light estimation mode
+     */
+    GdxLightEstimationMode getLightEstimationMode();
 }

@@ -26,7 +26,7 @@ public class GdxFrame implements Pool.Poolable {
     public GdxLightEstimationMode lightEstimationMode = GdxLightEstimationMode.DISABLED;
 
     /** Main directional light intensity */
-    public float lightIntensity = 0;
+    public final Vector3 lightIntensity = new Vector3();
 
     /** Main directional light direction */
     public final Vector3 lightDirection = new Vector3();

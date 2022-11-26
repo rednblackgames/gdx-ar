@@ -607,4 +607,9 @@ public class ARKitApplication implements ApplicationListener, GdxAR, ARSessionDe
     public void setPowerSaveMode(boolean powerSaveMode) {
 
     }
+
+    @Override
+    public GdxLightEstimationMode getLightEstimationMode() {
+        return gdxARConfiguration.lightEstimationMode;
+    }
 }
