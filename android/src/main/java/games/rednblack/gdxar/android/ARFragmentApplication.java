@@ -82,9 +82,6 @@ public class ARFragmentApplication extends AndroidFragmentApplication implements
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         AndroidApplicationConfiguration config = getConfiguration();
-        if (config == null) {
-            config = new AndroidApplicationConfiguration();
-        }
         FrameLayout frameLayout = new FrameLayout(getContext());
         View rootView = initializeForView(getArApplication(), config);
         frameLayout.addView(rootView);
