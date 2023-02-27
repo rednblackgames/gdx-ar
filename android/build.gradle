@@ -3,12 +3,12 @@ apply plugin: 'com.android.library'
 apply from : 'publish.gradle'
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
     buildToolsVersion "${buildTools}"
 
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 31
+        targetSdkVersion 33
     }
 
     sourceSets {
