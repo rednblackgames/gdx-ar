@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.utils.*;
 import com.google.ar.core.*;
 
@@ -69,6 +71,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
     private final float[] tmpVerts = new float[14];
 
     private InstructionsController instructionsController;
+    private Earth earth;
 
     public ARCoreApplication(GdxArApplicationListener gdxArApplicationListener, GdxARConfiguration gdxARConfiguration) {
         this.gdxArApplicationListener = gdxArApplicationListener;
@@ -217,8 +220,14 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 sessionConfig.setLightEstimationMode(Config.LightEstimationMode.ENVIRONMENTAL_HDR);
                 break;
         }
+        if (gdxARConfiguration.enableGeospatial) {
+            sessionConfig.setGeospatialMode(Config.GeospatialMode.ENABLED);
+        }
 
         getSession().configure(sessionConfig);
+        if (gdxARConfiguration.enableGeospatial) {
+            earth = getSession().getEarth();
+        }
 
         gdxArApplicationListener.create();
     }
@@ -414,6 +423,15 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
                 Anchor newAnchor = plane.createAnchor(pose);
                 return ARCoreToGdxAR.createGdxAnchor(newAnchor);
             }
+        }
+        return null;
+    }
+
+    @Null
+    public GdxAnchor createGeospatialAnchor(double latitude, double longitude, double altitude, Quaternion rotation) {
+        if (earth != null && earth.getTrackingState() == TrackingState.TRACKING) {
+            Anchor anchor = earth.createAnchor(latitude, longitude, altitude, rotation.x, rotation.y, rotation.z, rotation.w);
+            return ARCoreToGdxAR.createGdxAnchor(anchor);
         }
         return null;
     }

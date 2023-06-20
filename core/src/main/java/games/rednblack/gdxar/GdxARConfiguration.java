@@ -14,6 +14,8 @@ public class GdxARConfiguration {
     public boolean enableDepth = false;
     /** Enable internal debug mode */
     public boolean debugMode = false;
+    /** Enable geospatial anchors and API */
+    public boolean enableGeospatial = false;
 
     public GdxARConfiguration() {
 

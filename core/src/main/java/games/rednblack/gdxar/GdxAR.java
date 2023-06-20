@@ -1,6 +1,7 @@
 package games.rednblack.gdxar;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Null;
@@ -38,6 +39,19 @@ public interface GdxAR {
      */
     @Null
     GdxPose requestHitPlanePose(float x, float y, GdxPlaneType planeType);
+
+    /**
+     * Request to create a new geospatial anchor for further tracking
+     *
+     * @param latitude position in WGS84
+     * @param longitude position in WGS84
+     * @param altitude position in WGS84
+     * @param rotation vector of the object compared to Earth
+     *
+     * @return a new {@link GdxAnchor} object or null if anchor was created
+     */
+    @Null
+    public GdxAnchor createGeospatialAnchor(double latitude, double longitude, double altitude, Quaternion rotation);
 
     /**
      * Usually, camera autofocus is disabled by default for quality reason, enable only when needed.

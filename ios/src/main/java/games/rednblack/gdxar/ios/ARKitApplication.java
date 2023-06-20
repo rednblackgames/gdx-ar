@@ -16,33 +16,13 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pools;
 
-import org.robovm.apple.arkit.ARAnchor;
-import org.robovm.apple.arkit.ARCamera;
-import org.robovm.apple.arkit.ARCoachingGoal;
-import org.robovm.apple.arkit.ARCoachingOverlayView;
-import org.robovm.apple.arkit.ARCoachingOverlayViewDelegate;
-import org.robovm.apple.arkit.ARCollaborationData;
-import org.robovm.apple.arkit.ARFrame;
-import org.robovm.apple.arkit.ARGeoTrackingStatus;
-import org.robovm.apple.arkit.ARImageAnchor;
-import org.robovm.apple.arkit.ARLightEstimate;
-import org.robovm.apple.arkit.ARPlaneAnchor;
-import org.robovm.apple.arkit.ARPlaneDetection;
-import org.robovm.apple.arkit.ARPlaneGeometry;
-import org.robovm.apple.arkit.ARRaycastQuery;
-import org.robovm.apple.arkit.ARRaycastResult;
-import org.robovm.apple.arkit.ARRaycastTarget;
-import org.robovm.apple.arkit.ARRaycastTargetAlignment;
-import org.robovm.apple.arkit.ARReferenceImage;
-import org.robovm.apple.arkit.ARSession;
-import org.robovm.apple.arkit.ARSessionDelegate;
-import org.robovm.apple.arkit.ARSessionRunOptions;
-import org.robovm.apple.arkit.ARWorldTrackingConfiguration;
+import org.robovm.apple.arkit.*;
 import org.robovm.apple.avfoundation.AVCaptureDevice;
 import org.robovm.apple.avfoundation.AVMediaType;
 import org.robovm.apple.coregraphics.CGColorRenderingIntent;
@@ -292,6 +272,11 @@ public class ARKitApplication implements ApplicationListener, GdxAR, ARSessionDe
         raycastQuery.dispose();
         currentFrame.dispose();
         return gdxAnchor;
+    }
+
+    @Override
+    public GdxAnchor createGeospatialAnchor(double latitude, double longitude, double altitude, Quaternion rotation) {
+        return null;
     }
 
     @Override
