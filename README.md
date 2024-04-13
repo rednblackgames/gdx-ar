@@ -35,7 +35,7 @@ dependencies {
 
 | gdx-ar       | ARCore | AppCompat |
 |--------------|--------|-----------|
-| 0.1-SNAPSHOT | 1.35.0 | 1.6.1     |
+| 0.1-SNAPSHOT | 1.42.0 | 1.6.1     |
 
 ARCore requires Min SDK 24.
 
