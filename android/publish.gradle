@@ -38,66 +38,73 @@ repositories {
     mavenCentral()
 }
 
+publishing {
+    publications {
+        aar(MavenPublication) {
+            artifactId = artifact
+
+            pom {
+                name = "Augmented Reality extension for libGDX"
+                description = "Augmented Reality extension for libGDX (Android implemetation using Google's ARCore)"
+                url = "https://github.com/rednblackgames/gdx-ar"
+                licenses {
+                    license {
+                        name = "The Apache Software License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        distribution = "repo"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "fgnm"
+                        name = "Francesco Marongiu"
+                        email = "fgnm.dev@gmail.com"
+                    }
+                }
+                scm {
+                    connection = "scm:git@github.com:rednblackgames/gdx-ar.git"
+                    developerConnection = "scm:git@github.com:rednblackgames/gdx-ar.git"
+                    url = "scm:git@github.com:rednblackgames/gdx-ar.git"
+                }
+            }
+
+            afterEvaluate {
+                from components.release
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = sonatypeRepositoryUrl
+
+            if (getRepositoryUsername() || getRepositoryPassword())
+            {
+                credentials {
+                    username = getRepositoryUsername()
+                    password = getRepositoryPassword()
+                }
+            }
+        }
+    }
+}
+
+android {
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
 if(isReleaseBuild) {
     signing {
         useGpgCmd()
-        sign publishing.publications
+        sign publishing.publications.aar
     }
 } else {
     task signArchives {
         // do nothing
-    }
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
-
-                artifact androidSourcesJar
-                artifact androidJavadocsJar
-
-                artifactId = artifact
-                pom {
-                    name = "Augmented Reality extension for libGDX"
-                    description = "Augmented Reality extension for libGDX (Android implemetation using Google's ARCore)"
-                    url = "https://github.com/rednblackgames/gdx-ar"
-                    licenses {
-                        license {
-                            name = "The Apache Software License, Version 2.0"
-                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                            distribution = "repo"
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = "fgnm"
-                            name = "Francesco Marongiu"
-                            email = "fgnm.dev@gmail.com"
-                        }
-                    }
-                    scm {
-                        connection = "scm:git@github.com:rednblackgames/gdx-ar.git"
-                        developerConnection = "scm:git@github.com:rednblackgames/gdx-ar.git"
-                        url = "scm:git@github.com:rednblackgames/gdx-ar.git"
-                    }
-                }
-            }
-        }
-
-        repositories {
-            maven {
-                url = sonatypeRepositoryUrl
-
-                if (getRepositoryUsername() || getRepositoryPassword())
-                {
-                    credentials {
-                        username = getRepositoryUsername()
-                        password = getRepositoryPassword()
-                    }
-                }
-            }
-        }
     }
 }

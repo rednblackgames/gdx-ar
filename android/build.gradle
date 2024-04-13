@@ -1,36 +1,32 @@
-apply plugin: 'com.android.library'
-
-apply from : 'publish.gradle'
+plugins {
+    id 'com.android.library'
+}
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion "${buildTools}"
+    namespace 'games.rednblack.gdxar'
+    compileSdk 34
 
     defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 33
+        minSdk 24
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
     }
 
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src/main/java']
-            res.srcDirs = ['src/main/resources']
-
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    lintOptions {
-        abortOnError false
-    }
 }
 
 dependencies {
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
 
     implementation "androidx.appcompat:appcompat:$appcompatVersion"
@@ -39,30 +35,4 @@ dependencies {
     api project(":core")
 }
 
-task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    // JDK 1.8 is more strict then 1.7. Have JDK 1.8 behave like 1.7 for javadoc generation
-    if (org.gradle.internal.jvm.Jvm.current().getJavaVersion() == JavaVersion.VERSION_1_8) {
-        options.addStringOption('Xdoclint:none', '-quiet')
-    }
-}
-
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-    archiveClassifier.set('javadoc')
-    from androidJavadocs.destinationDir
-}
-
-task androidSourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.sourceFiles
-}
-
-artifacts {
-    archives androidSourcesJar
-    archives androidJavadocsJar
-}
-
-afterEvaluate {
-    androidJavadocs.classpath += project.android.libraryVariants.toList().first().javaCompile.classpath
-}
+apply from : 'publish.gradle'
