@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 import org.robovm.apple.arkit.ARFrame;
 import org.robovm.apple.coregraphics.CGSize;
+import org.robovm.apple.uikit.UIInterfaceOrientation;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,6 +27,8 @@ class BackgroundRenderer {
     private final int[] saveFlags;
 
     private final BackgroundRendererHelper backgroundRendererHelper;
+
+    private UIInterfaceOrientation lastOrientation = null;
 
     private static final String vertexShaderCode = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE +";\n"
                     + "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n"
@@ -74,9 +77,11 @@ class BackgroundRenderer {
         return backgroundRendererHelper.getViewport();
     }
 
-    public void update(ARFrame frame) {
-        if (mesh.getNumVertices() == 0) {
-            mesh.setVertices(backgroundRendererHelper.getVertices(frame));
+    public void update(ARFrame frame, UIInterfaceOrientation currentOrientation) {
+        if (mesh.getNumVertices() == 0 || currentOrientation != lastOrientation) {
+            lastOrientation = currentOrientation;
+
+            mesh.setVertices(backgroundRendererHelper.getVertices(frame, lastOrientation));
         }
 
         backgroundRendererHelper.updateTexture(frame);

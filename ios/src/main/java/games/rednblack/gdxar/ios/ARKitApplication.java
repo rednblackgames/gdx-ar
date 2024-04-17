@@ -410,15 +410,17 @@ public class ARKitApplication implements ApplicationListener, GdxAR, ARSessionDe
 
     @Override
     public void didUpdateFrame(ARSession session, ARFrame frame) {
-        backgroundRenderer.update(frame);
+        UIInterfaceOrientation currentOrientation = iosApplication != null ? iosApplication.getUIWindow().getWindowScene().getInterfaceOrientation() : UIInterfaceOrientation.Portrait;
+
+        backgroundRenderer.update(frame, currentOrientation);
 
         ARCamera camera = frame.getCamera();
         MatrixFloat4x4 projectionMatrix = camera
-                .getProjectionMatrix(UIInterfaceOrientation.Portrait,
+                .getProjectionMatrix(currentOrientation,
                         backgroundRenderer.getViewportSize(), arCamera.near, arCamera.far);
         ARKitToGdxAR.map(projectionMatrix, arCamera.projection);
 
-        MatrixFloat4x4 viewMatrix = camera.viewMatrixForOrientation(UIInterfaceOrientation.Portrait);
+        MatrixFloat4x4 viewMatrix = camera.viewMatrixForOrientation(currentOrientation);
         ARKitToGdxAR.map(viewMatrix, arCamera.view);
         camera.dispose();
 

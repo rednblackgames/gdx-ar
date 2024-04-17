@@ -32,6 +32,14 @@ public class BackgroundRendererHelper {
                     +1.0f, -1.0f,
             };
 
+    private static final float[] QUAD_COORDS_INVERSE =
+            new float[] {
+                    +1.0f, -1.0f,
+                    +1.0f, +1.0f,
+                    -1.0f, -1.0f,
+                    -1.0f, +1.0f,
+            };
+
     private static final float[] QUAD_TEXCOORDS =
             new float[] {
                     1.0f, 1.0f,
@@ -61,20 +69,21 @@ public class BackgroundRendererHelper {
         uvTexture = new StreamTexture(GL20.GL_LUMINANCE_ALPHA);
     }
 
-    float[] getVertices(ARFrame frame) {
-        if (tmpVertices == null) {
+    float[] getVertices(ARFrame frame, UIInterfaceOrientation currentOrientation) {
+        float[] coords = currentOrientation == UIInterfaceOrientation.LandscapeRight || currentOrientation == UIInterfaceOrientation.LandscapeLeft ? QUAD_COORDS_INVERSE : QUAD_COORDS;
+
+        if (tmpVertices == null)
             tmpVertices = new float[QUAD_COORDS.length + QUAD_TEXCOORDS.length];
 
-            CGAffineTransform transform = frame.displayTransform(UIInterfaceOrientation.Portrait, viewport);
-            for (int i = 0; i < 4; i++) {
-                float x = (QUAD_COORDS[i * 2] + 1.0f) / 2.0f;
-                float y = (QUAD_COORDS[(i * 2) + 1] + 1.0f) / 2.0f;
+        CGAffineTransform transform = frame.displayTransform(currentOrientation, viewport);
+        for (int i = 0; i < 4; i++) {
+            float x = (coords[i * 2] + 1.0f) / 2.0f;
+            float y = (coords[(i * 2) + 1] + 1.0f) / 2.0f;
 
-                tmpVertices[(i * 4)] = ((float) (transform.getA() * x + transform.getC() * y + transform.getTx()) * 2.0f) - 1.0f;
-                tmpVertices[(i * 4) + 1] = ((float) (transform.getB() * x + transform.getD() * y + transform.getTy()) * 2.0f) - 1.0f;
-                tmpVertices[(i * 4) + 2] = QUAD_TEXCOORDS[(i * 2)];
-                tmpVertices[(i * 4) + 3] = QUAD_TEXCOORDS[(i * 2) + 1];
-            }
+            tmpVertices[(i * 4)] = ((float) (transform.getA() * x + transform.getC() * y + transform.getTx()) * 2.0f) - 1.0f;
+            tmpVertices[(i * 4) + 1] = ((float) (transform.getB() * x + transform.getD() * y + transform.getTy()) * 2.0f) - 1.0f;
+            tmpVertices[(i * 4) + 2] = QUAD_TEXCOORDS[(i * 2)];
+            tmpVertices[(i * 4) + 3] = QUAD_TEXCOORDS[(i * 2) + 1];
         }
         return tmpVertices;
     }
