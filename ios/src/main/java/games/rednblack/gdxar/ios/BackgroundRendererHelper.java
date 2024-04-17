@@ -75,6 +75,9 @@ public class BackgroundRendererHelper {
         if (tmpVertices == null)
             tmpVertices = new float[QUAD_COORDS.length + QUAD_TEXCOORDS.length];
 
+        viewport.setWidth(Gdx.graphics.getBackBufferWidth());
+        viewport.setHeight(Gdx.graphics.getBackBufferHeight());
+
         CGAffineTransform transform = frame.displayTransform(currentOrientation, viewport);
         for (int i = 0; i < 4; i++) {
             float x = (coords[i * 2] + 1.0f) / 2.0f;
@@ -85,6 +88,7 @@ public class BackgroundRendererHelper {
             tmpVertices[(i * 4) + 2] = QUAD_TEXCOORDS[(i * 2)];
             tmpVertices[(i * 4) + 3] = QUAD_TEXCOORDS[(i * 2) + 1];
         }
+
         return tmpVertices;
     }
 

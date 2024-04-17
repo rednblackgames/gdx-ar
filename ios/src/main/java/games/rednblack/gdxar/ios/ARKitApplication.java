@@ -176,6 +176,13 @@ public class ARKitApplication implements ApplicationListener, GdxAR, ARSessionDe
 
     @Override
     public void resize(int width, int height) {
+        arCamera.viewportWidth = Gdx.graphics.getBackBufferWidth();
+        arCamera.viewportHeight = Gdx.graphics.getBackBufferHeight();
+
+        if (iosApplication != null) {
+            UIView uiView = iosApplication.getUIWindow();
+            coachingOverlay.setFrame(new CGRect(uiView.getFrame().getX(), uiView.getFrame().getY(), uiView.getFrame().getWidth(), uiView.getFrame().getHeight()));
+        }
         gdxArApplicationListener.resize(width, height);
     }
 

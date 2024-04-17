@@ -247,6 +247,9 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
     @Override
     public void resize(int width, int height) {
+        arCamera.viewportWidth = Gdx.graphics.getBackBufferWidth();
+        arCamera.viewportHeight = Gdx.graphics.getBackBufferHeight();
+
         gdxArApplicationListener.resize(width, height);
     }
 
