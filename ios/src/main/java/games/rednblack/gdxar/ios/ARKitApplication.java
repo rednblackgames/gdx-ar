@@ -130,7 +130,8 @@ public class ARKitApplication implements ApplicationListener, GdxAR, ARSessionDe
             coachingOverlay = new ARCoachingOverlayView();
             UIView uiView = iosApplication.getUIWindow();
             coachingOverlay.setUserInteractionEnabled(false);
-            uiView.addSubview(coachingOverlay);
+            if (gdxARConfiguration.enableOnScreenInstructions)
+                uiView.addSubview(coachingOverlay);
             coachingOverlay.setFrame(new CGRect(uiView.getFrame().getX(), uiView.getFrame().getY(), uiView.getFrame().getWidth(), uiView.getFrame().getHeight()));
 
             coachingOverlay.setSession(session);

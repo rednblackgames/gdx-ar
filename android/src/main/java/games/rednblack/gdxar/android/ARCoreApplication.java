@@ -234,6 +234,7 @@ public class ARCoreApplication implements ApplicationListener, GdxAR {
 
     public void initializeInstructions(Activity activity, LayoutInflater inflater, FrameLayout frameLayout) {
         instructionsController = new InstructionsController(activity, inflater, frameLayout);
+        instructionsController.setEnabled(gdxARConfiguration.enableOnScreenInstructions);
         instructionsController.setEnabled(InstructionsController.TYPE_PLANE_DISCOVERY, true);
     }
 
